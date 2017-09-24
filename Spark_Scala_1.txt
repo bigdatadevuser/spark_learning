@@ -1,0 +1,31 @@
+﻿Day 1 
+
+-----Hadoop & spark installation
+
+1. Install hadoop & spark with seperate user hadoop-user (Please refer online resources for hadoop & spark installation .. see point 9 ) 
+2. start hadoop /usr/local/hadoop/sbin/yarn.start.sh , /usr/local/hadoop/sbin/start.dfs.sh ,/usr/local/spark/sbin/start-all.sh
+3. verify spark installation ; spark-shell --version;
+4. verify hadoop installation hadoop version
+5. Install scala : 
+	# Scala Installation
+	wget www.scala-lang.org/files/archive/scala-2.11.8.deb
+	sudo dpkg -i scala-2.11.8.deb
+
+
+	# sbt Installation
+	echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
+	sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823
+	sudo apt-get update
+	sudo apt-get install sbt
+	
+6. Spark projects directory : /home/rohit/MyProjects/spark_learning
+7. verify scala installation : scala -version
+
+8. put sample file to hdfs ; and then access the same file from spark ; 
+
+9. Add below settings in ~/.bashrc file; this connects spark with hadoop 	 
+	export HADOOP_HOME=/usr/local/hadoop
+	export HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
+	export SPARK_HOME=/usr/local/spark
+	export PATH=$PATH:$SPARK_HOME/bin:$HADOOP_HOME/bin:$HADOOP_CONF_DIR
+
