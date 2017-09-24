@@ -23,9 +23,72 @@
 
 8. put sample file to hdfs ; and then access the same file from spark ; 
 
-9. Add below settings in ~/.bashrc file; this connects spark with hadoop 	 
+9. Add below settings in ~/.bashrc file; this connects spark with hadoop; remember spark and hadoop should be install under path /usr/local/ 	 
 	export HADOOP_HOME=/usr/local/hadoop
 	export HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
 	export SPARK_HOME=/usr/local/spark
 	export PATH=$PATH:$SPARK_HOME/bin:$HADOOP_HOME/bin:$HADOOP_CONF_DIR
+
+10. Make sure that same version scala should be install as of spark .. 
+11. Choose spark-hadoop binaries based on hadoop version. 
+    e.g : In my case I installed hadoop first = 2.7.3, then I downloaded hadoop-spark binaries with hadoop 2.7.3;and spark was compiled with scala 2.11.8 
+		  so later on I installed scala 2.11.8, once I installed spark ; 
+		  My installation sequence was Hadoop(2.7.3) -> Spark(2.2.0) -> Scala(2.11.8)
+		  
+		  Here , scala installation has dependancy on which spark version you are using..
+
+##########################################################################################
+
+//Below code creates Rdd by reading file from hdfs or using parallelize method; 
+
+1.  start spark-shell
+2.  upload LICENSE file from /usr/local/spark to hdfs : hadoop fs -put /usr/local/spark/LICENSE /data/spark/
+3.  val licLines = sc.textFile("/data/spark/LICENSE")
+4.  //check count 
+    licLines.count
+5.  //filter line which contains 'BSD'
+	val bsdLines = licLines.filter(line => line.contains("BSD"))
+    bsdLines.take(10).foreach(println)
+	
+
+// using parallelize methods;
+
+val nums = sc.parallelize(10 to 50 by 2)
+
+//square the  numbers   ;
+val  squared =  nums.map(x => x * x)
+
+// remeber Rdd dont have schema; only pure jvm objects;
+//Rdd is simply distributed collection of jvm objects in memory;
+
+//In above example ; we can see how our data has been distributed in partitions 
+ squared.getNumPartitions -> gives total no of data partitions;
+ 
+// Rdd has two main functions -> Transformations and Actions ;
+
+Transformation -> map,flatMap, filter,sample,groupByKey,reduceBykey etc..
+Actions -> collect, take,count,reduce,foreach, saveAsFile etc..
+
+
+So , You can think standard procedure when we use Rdd as below ;
+
+1. put file in hdfs or local file system
+2. read file as spark rdd ; depending on use case one Rdd can read all files or you can create multiple rdds if required ;
+3. once rdd is created ; apply tranformation on rdd ; 
+4. try to clean the data first ; once done cache the resulted rdd ; 
+5. later on perform actions on cached rdd ; 
+
+e.g  below code does the same thing;
+
+val licLines = sc.textFile("/data/spark/LICENSE")
+val bsdLines = licLines.filter(line => line.contains("BSD")).cache()
+bsdLines.take(10).foreach(println)
+
+//always remeber spark creates DAG based on our code like above then executes the entire DAG once action is called upon;
+in above case spark will execute all the lines when we execute last line 'bsdLines.take(10).foreach(println)' 
+this is lazy evaluation followed in spark; so key trick is let spark know what will be starting point for your code execution ; 
+when code is repetedly executed ; otherwise each time all code will be excuted ; this DAG model ; resume from where you stopped;
+
+//thats why caching plays very imp role here; 
+
 
